@@ -488,6 +488,45 @@
   }
   .btn.primary:hover { filter: brightness(1.05); color: #fff; }
 
+
+  .export-bar {
+    padding: 0 24px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .export-bar .export-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--grey-700);
+    margin-right: 2px;
+  }
+  .export-bar .scope {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--grey-700);
+    border: 1px solid var(--grey-200);
+    background: var(--hatchet-white);
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .export-bar .scope input {
+    accent-color: var(--hatchet-blue);
+    margin: 0;
+  }
+  .export-bar .export-count {
+    font-size: 11px;
+    color: var(--grey-500);
+  }
+  .export-bar .btn.export {
+    box-shadow: var(--shadow);
+  }
+
   .empty {
     padding: 48px 24px;
     text-align: center;
@@ -667,6 +706,18 @@
     <span class="swatch"><i class="data"></i> Data strength</span>
     <span>· Click a row to expand · Never invents metrics — derived from source files only</span>
   </div>
+
+  <div class="export-bar" id="exportBar">
+    <span class="export-label">Data export</span>
+    <label class="scope" title="When off, downloads only the rows matching current search + filter. When on, downloads all 50 prospects.">
+      <input type="checkbox" id="exportAll" />
+      All 50 (ignore filters)
+    </label>
+    <button type="button" class="btn export" id="btnCsv">Download CSV</button>
+    <button type="button" class="btn export primary" id="btnJson">Download JSON</button>
+    <span class="export-count" id="exportCount"></span>
+  </div>
+
 
   <div class="wrap">
     <div class="table-card">
@@ -999,6 +1050,7 @@
   }
 
   function render() {
+    updateExportCount();
     const list = sortAccounts(accounts.filter(matches));
     tbody.innerHTML = "";
     empty.hidden = list.length > 0;
@@ -1101,6 +1153,110 @@
     });
   });
 
+
+  const EXPORT_COLS = [
+    "Account", "Segment", "Focus", "Hook / signal",
+    "News score", "Outreach score", "Data score",
+    "Leave-behind", "Primary buyer", "Title", "LinkedIn",
+    "Notes / why fit", "Confidence"
+  ];
+
+  function exportRow(a) {
+    const pc = a.primary_contact || a.contact_1 || {};
+    const sig = a.signals || {};
+    return {
+      "Account": a.name || "",
+      "Segment": a.segment || "",
+      "Focus": a.focus || "",
+      "Hook / signal": a.hook || "",
+      "News score": sig.news_freshness != null ? sig.news_freshness : "",
+      "Outreach score": sig.outreach_readiness != null ? sig.outreach_readiness : "",
+      "Data score": sig.data_strength != null ? sig.data_strength : "",
+      "Leave-behind": a.has_leavebehind ? "Y" : "N",
+      "Primary buyer": pc.name || "",
+      "Title": pc.title || "",
+      "LinkedIn": pc.linkedin || "",
+      "Notes / why fit": a.why_full || a.hook || "",
+      "Confidence": pc.confidence || ""
+    };
+  }
+
+  function rowsForExport() {
+    const all = document.getElementById("exportAll").checked;
+    const list = all ? sortAccounts(accounts.slice()) : sortAccounts(accounts.filter(matches));
+    return list.map(exportRow);
+  }
+
+  function csvEscape(val) {
+    const s = val == null ? "" : String(val);
+    if (/[",\n\r]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  function toCsv(rows) {
+    const lines = [EXPORT_COLS.join(",")];
+    rows.forEach(function (r) {
+      lines.push(EXPORT_COLS.map(function (c) { return csvEscape(r[c]); }).join(","));
+    });
+    return lines.join("\n") + "\n";
+  }
+
+  function downloadBlob(filename, mime, text) {
+    const blob = new Blob([text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  }
+
+  function stamp() {
+    const d = new Date();
+    const pad = function (n) { return String(n).padStart(2, "0"); };
+    // Europe/Madrid-ish local box/browser stamp for filename
+    return d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) + "-" + pad(d.getHours()) + pad(d.getMinutes());
+  }
+
+  function updateExportCount() {
+    const all = document.getElementById("exportAll").checked;
+    const n = all ? accounts.length : accounts.filter(matches).length;
+    const label = all ? ("all " + n + " prospects") : (n + " visible row" + (n === 1 ? "" : "s"));
+    document.getElementById("exportCount").textContent = "Will export " + label;
+  }
+
+  document.getElementById("exportAll").addEventListener("change", updateExportCount);
+  document.getElementById("btnCsv").addEventListener("click", function () {
+    const rows = rowsForExport();
+    const scope = document.getElementById("exportAll").checked ? "all" : "filtered";
+    downloadBlob("hatchet-prospects-" + scope + "-" + stamp() + ".csv", "text/csv;charset=utf-8", toCsv(rows));
+  });
+  document.getElementById("btnJson").addEventListener("click", function () {
+    const rows = rowsForExport();
+    const scope = document.getElementById("exportAll").checked ? "all" : "filtered";
+    const payload = {
+      meta: {
+        title: "Hatchet Prospect Heat Table export",
+        owner: "Eduard Montserrat",
+        scope: scope,
+        row_count: rows.length,
+        filter: filter,
+        query: query,
+        generated_at: new Date().toISOString(),
+        columns: EXPORT_COLS
+      },
+      rows: rows
+    };
+    downloadBlob(
+      "hatchet-prospects-" + scope + "-" + stamp() + ".json",
+      "application/json;charset=utf-8",
+      JSON.stringify(payload, null, 2) + "\n"
+    );
+  });
+
+  updateExportCount();
   render();
   } // end bootApp
 
