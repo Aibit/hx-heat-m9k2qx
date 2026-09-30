@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Hatchet · Prospect Heat Table</title>
+<link rel="icon" type="image/webp" href="assets/logos/hatchet-shield-red.webp" />
+<style>
+  @font-face {
+    font-family: "Golos Text";
+    src: url("assets/fonts/GolosText-variable.ttf") format("truetype");
+    font-weight: 100 900;
+    font-display: swap;
+  }
+
+  :root {
+    --hatchet-red: #C4262D;
+    --hatchet-navy: #151F2D;
+    --hatchet-blue: #022658;
+    --hatchet-white: #FFFFFF;
+    --grey-50: #F7F8FA;
+    --grey-100: #EEF1F5;
+    --grey-200: #E2E6ED;
+    --grey-300: #C8CFD9;
+    --grey-500: #6B7585;
+    --grey-700: #3A4453;
+    --bar-news: #022658;
+    --bar-outreach: #C4262D;
+    --bar-data: #4A6FA5;
+    --shadow: 0 1px 2px rgba(21, 31, 45, 0.06), 0 4px 16px rgba(21, 31, 45, 0.04);
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--grey-50);
+    color: var(--hatchet-navy);
+    font-family: "Golos Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--hatchet-blue); text-decoration: none; }
+  a:hover { color: var(--hatchet-red); }
+
+  .topbar {
+    background: var(--hatchet-navy);
+    color: var(--hatchet-white);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    box-shadow: 0 2px 12px rgba(0,0,0,.25);
+  }
+  .topbar .logo {
+    height: 28px;
+    width: auto;
+    display: block;
+  }
+  .topbar .title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .topbar h1 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  .topbar .meta {
+    font-size: 11px;
+    color: rgba(255,255,255,.65);
+  }
+  .topbar .stats {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .stat-pill {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: rgba(255,255,255,.85);
+  }
+  .stat-pill strong { color: #fff; font-weight: 600; }
+  .stat-pill.hot {
+    background: rgba(196,38,45,.25);
+    border-color: rgba(196,38,45,.45);
+  }
+
+  .toolbar {
+    padding: 16px 24px 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .search {
+    flex: 1 1 260px;
+    min-width: 200px;
+    position: relative;
+  }
+  .search input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    border: 1px solid var(--grey-200);
+    border-radius: 8px;
+    background: var(--hatchet-white);
+    font: inherit;
+    color: var(--hatchet-navy);
+    outline: none;
+    box-shadow: var(--shadow);
+  }
+  .search input:focus { border-color: var(--hatchet-blue); }
+  .search .icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--grey-500);
+    font-size: 13px;
+    pointer-events: none;
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    border: 1px solid var(--grey-200);
+    background: var(--hatchet-white);
+    color: var(--grey-700);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: .12s ease;
+  }
+  .chip:hover { border-color: var(--hatchet-blue); color: var(--hatchet-blue); }
+  .chip.active {
+    background: var(--hatchet-blue);
+    border-color: var(--hatchet-blue);
+    color: #fff;
+  }
+  .chip.lb.active {
+    background: var(--hatchet-red);
+    border-color: var(--hatchet-red);
+  }
+  .chip.tw.active {
+    background: var(--hatchet-navy);
+    border-color: var(--hatchet-navy);
+  }
+
+  .legend {
+    padding: 4px 24px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    font-size: 11px;
+    color: var(--grey-500);
+  }
+  .legend .swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .legend i {
+    display: inline-block;
+    width: 12px;
+    height: 8px;
+    border-radius: 2px;
+  }
+  .legend .news { background: var(--bar-news); }
+  .legend .outreach { background: var(--bar-outreach); }
+  .legend .data { background: var(--bar-data); }
+
+  .wrap {
+    padding: 0 24px 40px;
+  }
+
+  .table-card {
+    background: var(--hatchet-white);
+    border: 1px solid var(--grey-200);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  table.heat {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  table.heat thead th {
+    position: sticky;
+    top: 64px;
+    z-index: 20;
+    background: var(--grey-50);
+    border-bottom: 1px solid var(--grey-200);
+    text-align: left;
+    padding: 11px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--grey-500);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+  }
+  table.heat thead th:hover { color: var(--hatchet-blue); }
+  table.heat thead th .sort {
+    margin-left: 4px;
+    opacity: .35;
+    font-size: 10px;
+  }
+  table.heat thead th.sorted .sort { opacity: 1; color: var(--hatchet-red); }
+
+  table.heat tbody tr {
+    border-bottom: 1px solid var(--grey-100);
+    cursor: pointer;
+    transition: background .1s ease;
+  }
+  table.heat tbody tr:hover,
+  table.heat tbody tr.open { background: #F3F6FB; }
+  table.heat tbody tr.leavebehind {
+    background: linear-gradient(90deg, rgba(196,38,45,.06), transparent 40%);
+  }
+  table.heat tbody tr.leavebehind:hover,
+  table.heat tbody tr.leavebehind.open {
+    background: linear-gradient(90deg, rgba(196,38,45,.1), #F3F6FB 45%);
+  }
+
+  table.heat td {
+    padding: 12px;
+    vertical-align: middle;
+    overflow: hidden;
+  }
+
+  col.c-account { width: 22%; }
+  col.c-segment { width: 11%; }
+  col.c-focus { width: 16%; }
+  col.c-hook { width: 28%; }
+  col.c-signal { width: 23%; }
+
+  .account-cell {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+  }
+  .avatar {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--hatchet-navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+  }
+  .avatar.lb { background: var(--hatchet-red); }
+  .account-meta { min-width: 0; }
+  .account-name {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: var(--hatchet-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .account-sub {
+    font-size: 11px;
+    color: var(--grey-500);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin-top: 2px;
+  }
+  .account-contact {
+    font-size: 11.5px;
+    margin-top: 1px;
+    color: var(--hatchet-navy);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .account-contact a { color: var(--hatchet-red); font-weight: 600; text-decoration: none; }
+  .account-contact a:hover { text-decoration: underline; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    border-radius: 4px;
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+  }
+  .badge.lb {
+    background: rgba(196,38,45,.12);
+    color: var(--hatchet-red);
+  }
+  .badge.tw {
+    background: rgba(2,38,88,.1);
+    color: var(--hatchet-blue);
+  }
+  .badge.api {
+    background: var(--grey-100);
+    color: var(--grey-700);
+  }
+
+  .seg-pill {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--grey-100);
+    color: var(--grey-700);
+  }
+  .seg-Publisher { background: #E8EEF8; color: var(--hatchet-blue); }
+  .seg-Hardware { background: #F0E8F5; color: #5B2C6F; }
+  .seg-Brand { background: #FDECEA; color: var(--hatchet-red); }
+  .seg-Agency { background: #EAF6F0; color: #1B6B45; }
+  .seg-Esports { background: #FFF4E5; color: #9A5B00; }
+
+  .focus-cell, .hook-cell {
+    font-size: 12.5px;
+    color: var(--grey-700);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .focus-cell { font-weight: 500; color: var(--hatchet-navy); }
+
+  .signal-cell { padding-right: 16px !important; }
+  .signal-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .signal-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 11px;
+    color: var(--grey-500);
+  }
+  .signal-top strong {
+    font-size: 13px;
+    color: var(--hatchet-navy);
+    font-weight: 700;
+  }
+  .stack {
+    display: flex;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+    background: var(--grey-100);
+    width: 100%;
+  }
+  .stack span {
+    display: block;
+    height: 100%;
+  }
+  .stack .n { background: var(--bar-news); }
+  .stack .o { background: var(--bar-outreach); }
+  .stack .d { background: var(--bar-data); }
+  .stack-labels {
+    display: flex;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--grey-500);
+  }
+  .stack-labels b { font-weight: 600; color: var(--grey-700); }
+
+  /* Expand / detail row */
+  tr.detail-row td {
+    padding: 0;
+    background: var(--grey-50);
+    border-bottom: 1px solid var(--grey-200);
+    cursor: default;
+  }
+  .detail {
+    padding: 16px 18px 18px 54px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 980px) {
+    .detail { grid-template-columns: 1fr; padding-left: 18px; }
+    col.c-focus, .c-focus-h, td.focus-td { display: none; }
+  }
+  .detail h3 {
+    margin: 0 0 8px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--grey-500);
+    font-weight: 600;
+  }
+  .detail ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .detail li {
+    position: relative;
+    padding: 0 0 8px 14px;
+    font-size: 12.5px;
+    color: var(--hatchet-navy);
+  }
+  .detail li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--hatchet-red);
+  }
+  .detail .panel {
+    background: var(--hatchet-white);
+    border: 1px solid var(--grey-200);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .detail .panel.blue {
+    background: var(--hatchet-blue);
+    border-color: var(--hatchet-blue);
+    color: #fff;
+  }
+  .detail .panel.blue h3 { color: rgba(255,255,255,.65); }
+  .detail .panel.blue li { color: #fff; }
+  .detail .panel.blue li::before { background: var(--hatchet-red); }
+  .contact-name { font-weight: 700; font-size: 13.5px; margin-bottom: 2px; }
+  .contact-title { font-size: 12px; color: var(--grey-700); margin-bottom: 8px; }
+  .panel.blue .contact-title { color: rgba(255,255,255,.8); }
+  .signal-why {
+    font-size: 11.5px;
+    color: var(--grey-700);
+    margin-top: 6px;
+  }
+  .panel.blue .signal-why { color: rgba(255,255,255,.75); }
+  .muted { color: var(--grey-500); font-size: 12px; }
+  .links { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--grey-200);
+    background: var(--hatchet-white);
+    color: var(--hatchet-navy);
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn:hover { border-color: var(--hatchet-red); color: var(--hatchet-red); }
+  .btn.primary {
+    background: var(--hatchet-red);
+    border-color: var(--hatchet-red);
+    color: #fff;
+  }
+  .btn.primary:hover { filter: brightness(1.05); color: #fff; }
+
+  .empty {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--grey-500);
+  }
+
+  .footer {
+    padding: 8px 24px 32px;
+    font-size: 11px;
+    color: var(--grey-500);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+  }
+
+  /* Tooltip on signal bar */
+  .tip {
+    position: fixed;
+    z-index: 100;
+    max-width: 320px;
+    background: var(--hatchet-navy);
+    color: #fff;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 11.5px;
+    line-height: 1.4;
+    pointer-events: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,.25);
+    opacity: 0;
+    transition: opacity .1s ease;
+  }
+  .tip.visible { opacity: 1; }
+  .tip strong { color: #fff; }
+  .tip .row { display: flex; justify-content: space-between; gap: 12px; margin: 3px 0; }
+  .tip .label { color: rgba(255,255,255,.7); }
+
+  /* Password gate (public deploy) */
+  #gate {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: var(--hatchet-navy);
+    color: var(--hatchet-white);
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #gate.open { display: flex; }
+  #gate .card {
+    width: min(400px, 100%);
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 14px;
+    padding: 28px 24px 22px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.35);
+  }
+  #gate .brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  #gate .brand img { height: 26px; }
+  #gate h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 650;
+  }
+  #gate p {
+    margin: 0 0 16px;
+    font-size: 13px;
+    color: rgba(255,255,255,.7);
+    line-height: 1.45;
+  }
+  #gate label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.55);
+    margin-bottom: 6px;
+  }
+  #gate input[type="password"] {
+    width: 100%;
+    border: 1px solid rgba(255,255,255,.2);
+    background: rgba(0,0,0,.25);
+    color: #fff;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+    font-size: 15px;
+    outline: none;
+  }
+  #gate input[type="password"]:focus {
+    border-color: var(--hatchet-red);
+    box-shadow: 0 0 0 3px rgba(196,38,45,.25);
+  }
+  #gate .row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    align-items: center;
+  }
+  #gate button {
+    border: 0;
+    background: var(--hatchet-red);
+    color: #fff;
+    font: inherit;
+    font-weight: 650;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  #gate button:hover { filter: brightness(1.08); }
+  #gate button:disabled { opacity: .6; cursor: wait; }
+  #gate .err {
+    margin-top: 12px;
+    font-size: 12.5px;
+    color: #ffb4b8;
+    min-height: 1.2em;
+  }
+  body.gated-locked > :not(#gate) { visibility: hidden; }
+</style>
+</head>
+<body>
+
+  <div id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+    <div class="card">
+      <div class="brand">
+        <img src="assets/logos/hatchet-wordmark-white.svg" alt="Hatchet" />
+      </div>
+      <h2 id="gateTitle">Prospect Heat Table</h2>
+      <p>Private share link. Enter the dashboard password to decrypt prospect + buyer contact data.</p>
+      <form id="gateForm" autocomplete="current-password">
+        <label for="gatePw">Password</label>
+        <input id="gatePw" name="password" type="password" required autofocus />
+        <div class="row">
+          <button type="submit" id="gateBtn">Unlock</button>
+        </div>
+        <div class="err" id="gateErr" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+  <header class="topbar">
+    <img class="logo" src="assets/logos/hatchet-wordmark-white.svg" alt="Hatchet" />
+    <div class="title-block">
+      <h1>Prospect Heat Table</h1>
+      <div class="meta" id="metaLine">Loading…</div>
+    </div>
+    <div class="stats" id="stats"></div>
+  </header>
+
+  <div class="toolbar">
+    <div class="search">
+      <span class="icon">⌕</span>
+      <input id="q" type="search" placeholder="Search account, focus, hook, contact, region…" autocomplete="off" />
+    </div>
+    <div class="filters" id="filters">
+      <button type="button" class="chip active" data-filter="all">All</button>
+      <button type="button" class="chip lb" data-filter="leavebehind">Leave-behinds</button>
+      <button type="button" class="chip tw" data-filter="thisweek">This week</button>
+      <button type="button" class="chip" data-filter="Publisher">Publisher</button>
+      <button type="button" class="chip" data-filter="Hardware">Hardware</button>
+      <button type="button" class="chip" data-filter="Brand">Brand</button>
+      <button type="button" class="chip" data-filter="Agency">Agency</button>
+      <button type="button" class="chip" data-filter="Esports">Esports</button>
+      <button type="button" class="chip" data-filter="api">API hook</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span>Signal stack (max 9):</span>
+    <span class="swatch"><i class="news"></i> News freshness</span>
+    <span class="swatch"><i class="outreach"></i> Outreach readiness</span>
+    <span class="swatch"><i class="data"></i> Data strength</span>
+    <span>· Click a row to expand · Never invents metrics — derived from source files only</span>
+  </div>
+
+  <div class="wrap">
+    <div class="table-card">
+      <table class="heat" id="table">
+        <colgroup>
+          <col class="c-account" />
+          <col class="c-segment" />
+          <col class="c-focus" />
+          <col class="c-hook" />
+          <col class="c-signal" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th data-sort="name">Account <span class="sort">↕</span></th>
+            <th data-sort="segment">Segment <span class="sort">↕</span></th>
+            <th data-sort="focus" class="c-focus-h">Focus <span class="sort">↕</span></th>
+            <th data-sort="hook">Hook / live signal <span class="sort">↕</span></th>
+            <th data-sort="signal" class="sorted">Signal <span class="sort">↓</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty" hidden>No prospects match this filter.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>SEGA &amp; BLAST are clients — excluded. Do not pitch known Hatchet / GameSquare clients.</div>
+    <div id="footerMeta"></div>
+  </div>
+
+  <div class="tip" id="tip" role="tooltip"></div>
+
+    <script>
+(function () {
+  const ENC_URL = "data/prospects.enc.json";
+  const SESSION_KEY = "hatchet_heat_pw";
+
+  function b64ToBytes(b64) {
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  async function deriveKey(password, salt, iterations) {
+    const enc = new TextEncoder();
+    const baseKey = await crypto.subtle.importKey(
+      "raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]
+    );
+    return crypto.subtle.deriveKey(
+      { name: "PBKDF2", salt: salt, iterations: iterations, hash: "SHA-256" },
+      baseKey,
+      { name: "AES-GCM", length: 256 },
+      false,
+      ["decrypt"]
+    );
+  }
+
+  async function decryptProspects(blob, password) {
+    const salt = b64ToBytes(blob.salt);
+    const iv = b64ToBytes(blob.iv);
+    const ct = b64ToBytes(blob.ct);
+    const key = await deriveKey(password, salt, blob.iter || 250000);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: iv }, key, ct);
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  function showGate(msg) {
+    document.body.classList.add("gated-locked");
+    const gate = document.getElementById("gate");
+    gate.classList.add("open");
+    if (msg) document.getElementById("gateErr").textContent = msg;
+  }
+
+  function hideGate() {
+    document.body.classList.remove("gated-locked");
+    document.getElementById("gate").classList.remove("open");
+  }
+
+  async function tryUnlock(password, persist) {
+    const res = await fetch(ENC_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("Encrypted data missing (" + res.status + ")");
+    const blob = await res.json();
+    const data = await decryptProspects(blob, password);
+    if (!data || !data.accounts) throw new Error("Decrypted payload invalid");
+    window.PROSPECTS_DATA = data;
+    if (persist) {
+      try { sessionStorage.setItem(SESSION_KEY, password); } catch (e) {}
+    }
+    hideGate();
+    bootApp();
+  }
+
+  function wireGate() {
+    const form = document.getElementById("gateForm");
+    const btn = document.getElementById("gateBtn");
+    const err = document.getElementById("gateErr");
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      err.textContent = "";
+      btn.disabled = true;
+      const pw = document.getElementById("gatePw").value;
+      try {
+        await tryUnlock(pw, true);
+      } catch (ex) {
+        err.textContent = "Wrong password or corrupt data. Try again.";
+        console.warn(ex);
+        btn.disabled = false;
+      }
+    });
+  }
+
+  async function bootGated() {
+    wireGate();
+    let cached = null;
+    try { cached = sessionStorage.getItem(SESSION_KEY); } catch (e) {}
+    if (cached) {
+      try {
+        await tryUnlock(cached, true);
+        return;
+      } catch (e) {
+        try { sessionStorage.removeItem(SESSION_KEY); } catch (e2) {}
+      }
+    }
+    showGate("");
+  }
+
+  function bootApp() {
+  const data = window.PROSPECTS_DATA;
+  if (!data || !data.accounts) {
+    document.getElementById("metaLine").textContent = "Missing data/prospects.js — run build_data.py";
+    return;
+  }
+
+  const accounts = data.accounts.slice();
+  let filter = "all";
+  let query = "";
+  let sortKey = "signal";
+  let sortDir = -1; // desc
+  let openId = null;
+
+  const tbody = document.getElementById("tbody");
+  const empty = document.getElementById("empty");
+  const tip = document.getElementById("tip");
+  const qInput = document.getElementById("q");
+
+  function formatGenerated(iso) {
+    try {
+      const d = new Date(iso);
+      return d.toLocaleString("en-GB", {
+        timeZone: "Europe/Madrid",
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+      }) + " CEST";
+    } catch (e) { return iso; }
+  }
+
+  document.getElementById("metaLine").textContent =
+    data.meta.counts.prospects + " prospects · generated " + formatGenerated(data.meta.generated_at);
+  document.getElementById("footerMeta").textContent =
+    "Sources: hatchet-prospects-50.md · buyer-contacts-50 · account-cards · API samples";
+
+  const stats = document.getElementById("stats");
+  stats.innerHTML =
+    '<span class="stat-pill hot"><strong>' + data.meta.counts.leavebehinds + '</strong> leave-behinds</span>' +
+    '<span class="stat-pill"><strong>' + data.meta.counts.this_week + '</strong> this week</span>' +
+    '<span class="stat-pill"><strong>' + data.meta.counts.with_contacts + '</strong> named #1</span>' +
+    '<span class="stat-pill"><strong>' + data.meta.counts.with_api + '</strong> API hooks</span>';
+
+  function initials(name) {
+    const parts = name.replace(/[()]/g, " ").split(/\s+/).filter(Boolean);
+    if (parts[0] === "100") return "100";
+    if (parts[0] === "G" && parts[1] && parts[1].FUEL) return "GF";
+    const a = parts[0][0] || "";
+    const b = (parts[1] && parts[1][0]) || (parts[0][1] || "");
+    return (a + b).toUpperCase();
+  }
+
+  function matches(a) {
+    if (filter === "leavebehind" && !a.has_leavebehind) return false;
+    if (filter === "thisweek" && !a.this_week) return false;
+    if (filter === "api" && !a.has_api_hook) return false;
+    if (["Publisher","Hardware","Brand","Agency","Esports"].includes(filter) && a.segment !== filter) return false;
+    if (!query) return true;
+    const hay = [
+      a.name, a.domain, a.segment, a.focus, a.hook, a.why_full, a.region,
+      a.contact_1 && a.contact_1.name,
+      a.contact_1 && a.contact_1.title,
+      (a.actionable || []).join(" ")
+    ].filter(Boolean).join(" ").toLowerCase();
+    return hay.includes(query);
+  }
+
+  function sortAccounts(list) {
+    const dir = sortDir;
+    list.sort((x, y) => {
+      let av, bv;
+      switch (sortKey) {
+        case "name": av = x.name.toLowerCase(); bv = y.name.toLowerCase(); break;
+        case "segment": av = x.segment; bv = y.segment; break;
+        case "focus": av = x.focus.toLowerCase(); bv = y.focus.toLowerCase(); break;
+        case "hook": av = x.hook.toLowerCase(); bv = y.hook.toLowerCase(); break;
+        case "signal":
+        default:
+          av = x.signals.total; bv = y.signals.total;
+          if (av === bv) {
+            const pr = (x.priority_rank ?? 99) - (y.priority_rank ?? 99);
+            if (pr) return pr;
+            return x.id - y.id;
+          }
+          break;
+      }
+      if (av < bv) return -1 * dir;
+      if (av > bv) return 1 * dir;
+      return x.id - y.id;
+    });
+    return list;
+  }
+
+  function stackHtml(s) {
+    const max = s.max || 9;
+    const n = (s.news_freshness / max) * 100;
+    const o = (s.outreach_readiness / max) * 100;
+    const d = (s.data_strength / max) * 100;
+    return (
+      '<div class="signal-wrap" data-tip="1">' +
+        '<div class="signal-top"><strong>' + s.total + '</strong><span>/ ' + max + '</span></div>' +
+        '<div class="stack">' +
+          '<span class="n" style="width:' + n + '%"></span>' +
+          '<span class="o" style="width:' + o + '%"></span>' +
+          '<span class="d" style="width:' + d + '%"></span>' +
+        '</div>' +
+        '<div class="stack-labels">' +
+          '<span>N <b>' + s.news_freshness + '</b></span>' +
+          '<span>O <b>' + s.outreach_readiness + '</b></span>' +
+          '<span>D <b>' + s.data_strength + '</b></span>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function tipHtml(a) {
+    const s = a.signals;
+    return (
+      '<strong>' + escapeHtml(a.name) + '</strong>' +
+      '<div class="row"><span class="label">News freshness</span><span>' + s.news_freshness + '/3</span></div>' +
+      '<div style="opacity:.75;margin-bottom:4px">' + escapeHtml(s.why.news_freshness) + '</div>' +
+      '<div class="row"><span class="label">Outreach readiness</span><span>' + s.outreach_readiness + '/3</span></div>' +
+      '<div style="opacity:.75;margin-bottom:4px">' + escapeHtml(s.why.outreach_readiness) + '</div>' +
+      '<div class="row"><span class="label">Data strength</span><span>' + s.data_strength + '/3</span></div>' +
+      '<div style="opacity:.75">' + escapeHtml(s.why.data_strength) + '</div>'
+    );
+  }
+
+  function escapeHtml(str) {
+    return String(str == null ? "" : str)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function detailHtml(a) {
+    const bullets = (a.actionable || []).map(function (b) {
+      return "<li>" + escapeHtml(b) + "</li>";
+    }).join("");
+    let contact = '<p class="muted">No named #1 contact in sources yet.</p>';
+    if (a.contact_1) {
+      contact =
+        '<div class="contact-name">' + escapeHtml(a.contact_1.name) + '</div>' +
+        '<div class="contact-title">' + escapeHtml(a.contact_1.title) + '</div>' +
+        '<div class="muted">Confidence: ' + escapeHtml(a.contact_1.confidence) + ' · re-confirm LinkedIn before send</div>' +
+        '<div class="links">' +
+          (a.contact_1.linkedin
+            ? '<a class="btn primary" href="' + escapeHtml(a.contact_1.linkedin) + '" target="_blank" rel="noopener">LinkedIn</a>'
+            : "") +
+        '</div>';
+    }
+    let lb = "";
+    if (a.leavebehind) {
+      lb =
+        '<li>Leave-behind: ' + escapeHtml(a.leavebehind.decision) + '</li>' +
+        (a.leavebehind.send_to_titles && a.leavebehind.send_to_titles.length
+          ? '<li>Send-to titles: ' + escapeHtml(a.leavebehind.send_to_titles.join(" · ")) + '</li>'
+          : "") +
+        (a.leavebehind.note ? '<li>' + escapeHtml(a.leavebehind.note) + '</li>' : "");
+    }
+    const signals =
+      '<ul>' +
+        '<li>News ' + a.signals.news_freshness + '/3 — ' + escapeHtml(a.signals.why.news_freshness) + '</li>' +
+        '<li>Outreach ' + a.signals.outreach_readiness + '/3 — ' + escapeHtml(a.signals.why.outreach_readiness) + '</li>' +
+        '<li>Data ' + a.signals.data_strength + '/3 — ' + escapeHtml(a.signals.why.data_strength) + '</li>' +
+      '</ul>' +
+      (a.api_samples && a.api_samples.length
+        ? '<div class="signal-why">API samples: ' + escapeHtml(a.api_samples.join(", ")) + '</div>'
+        : '<div class="signal-why">No API sample files mapped for this account on box.</div>');
+
+    return (
+      '<div class="detail">' +
+        '<div class="panel blue">' +
+          '<h3>Actionable</h3>' +
+          '<ul>' + bullets + lb + '</ul>' +
+          '<div class="links">' +
+            '<a class="btn" style="background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.25);color:#fff" href="' + escapeHtml(a.website) + '" target="_blank" rel="noopener">' + escapeHtml(a.domain) + '</a>' +
+            (a.has_leavebehind && a.leavebehind && a.leavebehind.card
+              ? '<a class="btn primary" href="' + escapeHtml(a.leavebehind.card) + '" target="_blank" rel="noopener">Open leave-behind PNG</a>'
+              : "") +
+          '</div>' +
+        '</div>' +
+        '<div class="panel">' +
+          '<h3>#1 contact</h3>' + contact +
+        '</div>' +
+        '<div class="panel">' +
+          '<h3>Signal breakdown</h3>' + signals +
+          '<div class="muted" style="margin-top:10px">Region: ' + escapeHtml(a.region) + ' · List #' + a.id +
+          (a.priority_rank != null ? ' · Queue #' + a.priority_rank : '') + '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+
+  function contactLineHtml(a) {
+    const pc = a.primary_contact || a.contact_1;
+    if (!pc || !pc.name) return "";
+    const label = escapeHtml(pc.name);
+    const inner = pc.linkedin
+      ? '<a href="' + escapeHtml(pc.linkedin) + '" target="_blank" rel="noopener">' + label + '</a>'
+      : label;
+    return '<div class="account-contact">' + inner + '</div>';
+  }
+
+  function render() {
+    const list = sortAccounts(accounts.filter(matches));
+    tbody.innerHTML = "";
+    empty.hidden = list.length > 0;
+    document.querySelectorAll("thead th").forEach(function (th) {
+      th.classList.toggle("sorted", th.dataset.sort === sortKey);
+      const sp = th.querySelector(".sort");
+      if (sp) sp.textContent = th.dataset.sort === sortKey ? (sortDir < 0 ? "↓" : "↑") : "↕";
+    });
+
+    list.forEach(function (a) {
+      const tr = document.createElement("tr");
+      tr.dataset.id = String(a.id);
+      if (a.has_leavebehind) tr.classList.add("leavebehind");
+      if (openId === a.id) tr.classList.add("open");
+
+      const badges =
+        (a.has_leavebehind ? '<span class="badge lb">Leave-behind</span>' : "") +
+        (a.this_week ? '<span class="badge tw">This week #' + a.priority_rank + '</span>' : "") +
+        (a.backup_queue ? '<span class="badge tw">Backup #' + a.priority_rank + '</span>' : "") +
+        (a.has_api_hook ? '<span class="badge api">API</span>' : "");
+
+      tr.innerHTML =
+        '<td><div class="account-cell">' +
+          '<div class="avatar' + (a.has_leavebehind ? ' lb' : '') + '">' + escapeHtml(initials(a.name)) + '</div>' +
+          '<div class="account-meta">' +
+            '<div class="account-name" title="' + escapeHtml(a.name) + '">' + escapeHtml(a.name) + '</div>' +
+            '<div class="account-sub"><span>' + escapeHtml(a.domain) + '</span>' + badges + '</div>' +
+            contactLineHtml(a) +
+          '</div></div></td>' +
+        '<td><span class="seg-pill seg-' + escapeHtml(a.segment) + '">' + escapeHtml(a.segment) + '</span></td>' +
+        '<td class="focus-td"><div class="focus-cell" title="' + escapeHtml(a.focus) + '">' + escapeHtml(a.focus) + '</div></td>' +
+        '<td><div class="hook-cell" title="' + escapeHtml(a.why_full) + '">' + escapeHtml(a.hook) + '</div></td>' +
+        '<td class="signal-cell">' + stackHtml(a.signals) + '</td>';
+
+      tr.addEventListener("click", function (e) {
+        if (e.target.closest("a")) return;
+        openId = openId === a.id ? null : a.id;
+        render();
+      });
+
+      const signalWrap = tr.querySelector("[data-tip]");
+      if (signalWrap) {
+        signalWrap.addEventListener("mouseenter", function (e) {
+          tip.innerHTML = tipHtml(a);
+          tip.classList.add("visible");
+          moveTip(e);
+        });
+        signalWrap.addEventListener("mousemove", moveTip);
+        signalWrap.addEventListener("mouseleave", function () {
+          tip.classList.remove("visible");
+        });
+      }
+
+      tbody.appendChild(tr);
+
+      if (openId === a.id) {
+        const dr = document.createElement("tr");
+        dr.className = "detail-row";
+        dr.innerHTML = '<td colspan="5">' + detailHtml(a) + "</td>";
+        dr.addEventListener("click", function (e) { e.stopPropagation(); });
+        tbody.appendChild(dr);
+      }
+    });
+  }
+
+  function moveTip(e) {
+    const pad = 14;
+    let x = e.clientX + pad;
+    let y = e.clientY + pad;
+    tip.style.left = "0px";
+    tip.style.top = "0px";
+    const rect = tip.getBoundingClientRect();
+    if (x + rect.width > window.innerWidth - 8) x = e.clientX - rect.width - pad;
+    if (y + rect.height > window.innerHeight - 8) y = e.clientY - rect.height - pad;
+    tip.style.left = Math.max(8, x) + "px";
+    tip.style.top = Math.max(8, y) + "px";
+  }
+
+  document.getElementById("filters").addEventListener("click", function (e) {
+    const btn = e.target.closest(".chip");
+    if (!btn) return;
+    filter = btn.dataset.filter;
+    document.querySelectorAll(".chip").forEach(function (c) {
+      c.classList.toggle("active", c === btn);
+    });
+    render();
+  });
+
+  qInput.addEventListener("input", function () {
+    query = qInput.value.trim().toLowerCase();
+    render();
+  });
+
+  document.querySelectorAll("thead th").forEach(function (th) {
+    th.addEventListener("click", function () {
+      const key = th.dataset.sort;
+      if (sortKey === key) sortDir *= -1;
+      else { sortKey = key; sortDir = key === "signal" ? -1 : 1; }
+      render();
+    });
+  });
+
+  render();
+  } // end bootApp
+
+  // Local/file://: prospects.js already set PROSPECTS_DATA → skip gate.
+  // Public deploy: dist omits prospects.js and ships prospects.enc.json → gate.
+  if (window.PROSPECTS_DATA && window.PROSPECTS_DATA.accounts) {
+    bootApp();
+  } else {
+    bootGated();
+  }
+})();
+  </script>
+</body>
+</html>
